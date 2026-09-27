@@ -1,182 +1,1087 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en-IN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMI Calculator</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#3b82f6">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .gradient-bg { background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); }
-        .gradient-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-        .gradient-blue { background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%); }
-        .gradient-orange { background: linear-gradient(135deg, #f97316 0%, #ef4444 100%); }
-        .gradient-purple { background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SIP and EMI calculator</title>
+<meta name="description" content="SIP returns with optional lump sums, and loan EMI with a year-wise schedule.">
+<meta name="theme-color" content="#F2F4F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#11142F" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Latin:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Latin:wdth,wght@75..125,100..800&display=swap">
+<style>
+:root {
+  --bg: #F2F4F8;
+  --surface: #FFFFFF;
+  --ink: #16193A;
+  --ink-2: #464B6A;
+  --ink-3: #5F6486;
+  --line: #E1E4ED;
+  --line-2: #C8CDDC;
+  --track: #DCE0EB;
+  --indigo: #3947B5;
+  --indigo-soft: rgba(57, 71, 181, 0.13);
+  --marigold: #D4880A;
+  --marigold-soft: rgba(212, 136, 10, 0.24);
+  --rose: #C23A5E;
+  --on-ink: #FFFFFF;
+  --font: "Anek Latin", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11142F;
+    --surface: #191D3E;
+    --ink: #ECEEFB;
+    --ink-2: #B8BCD8;
+    --ink-3: #979CBE;
+    --line: #2A2F60;
+    --line-2: #3E4479;
+    --track: #2D3265;
+    --indigo: #97A2FF;
+    --indigo-soft: rgba(151, 162, 255, 0.2);
+    --marigold: #F6B84A;
+    --marigold-soft: rgba(246, 184, 74, 0.24);
+    --rose: #FF86A3;
+    --on-ink: #11142F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11142F;
+  --surface: #191D3E;
+  --ink: #ECEEFB;
+  --ink-2: #B8BCD8;
+  --ink-3: #979CBE;
+  --line: #2A2F60;
+  --line-2: #3E4479;
+  --track: #2D3265;
+  --indigo: #97A2FF;
+  --indigo-soft: rgba(151, 162, 255, 0.2);
+  --marigold: #F6B84A;
+  --marigold-soft: rgba(246, 184, 74, 0.24);
+  --rose: #FF86A3;
+  --on-ink: #11142F;
+  color-scheme: dark;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+*, *::before, *::after { box-sizing: inherit; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+
+.wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 22px max(16px, env(safe-area-inset-right, 0px)) 56px max(16px, env(safe-area-inset-left, 0px));
+}
+
+/* Header and tabs */
+.top h1 { margin: 0; font-size: 1.6rem; line-height: 1.15; font-weight: 700; font-stretch: 90%; letter-spacing: -0.01em; }
+.top p { margin: 6px 0 0; color: var(--ink-2); max-width: 62ch; }
+.tabs {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+  width: 100%; max-width: 380px; margin: 18px 0 24px; padding: 4px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 999px;
+}
+.tab {
+  appearance: none; -webkit-appearance: none; border: 0; background: transparent; cursor: pointer;
+  padding: 10px 12px; border-radius: 999px; font-weight: 600; color: var(--ink-2);
+  transition: background-color .2s ease, color .2s ease;
+}
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { background: var(--ink); color: var(--on-ink); }
+
+/* Panel layout: result first on phones, inputs beside results on wide screens */
+.layout {
+  display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "hero" "inputs" "chart" "table" "method";
+}
+.hero { grid-area: hero; min-width: 0; }
+.inputs { grid-area: inputs; }
+.chart-block { grid-area: chart; min-width: 0; }
+.table-block { grid-area: table; min-width: 0; }
+.method { grid-area: method; }
+@media (min-width: 880px) {
+  .layout {
+    grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+    column-gap: 40px; row-gap: 28px; align-items: start;
+    grid-template-areas: "inputs hero" "inputs chart" "inputs table" "inputs method";
+  }
+  .inputs {
+    position: sticky; top: calc(16px + env(safe-area-inset-top, 0px));
+    max-height: calc(100vh - 32px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    overflow-y: auto; overscroll-behavior: contain;
+  }
+  .hero { padding-top: 4px; }
+}
+.layout .hero, .layout .chart-block, .layout .table-block { transition: opacity .2s ease; }
+.layout.is-stale .hero, .layout.is-stale .chart-block, .layout.is-stale .table-block { opacity: .38; }
+
+/* Result statement */
+.lead { margin: 0; font-size: 1.1rem; line-height: 1.45; color: var(--ink-2); max-width: 38ch; }
+.lead strong, .note strong { color: var(--ink); font-weight: 600; white-space: nowrap; }
+.big {
+  margin: 4px 0 0; font-size: clamp(2.5rem, 11vw, 4.25rem); line-height: 1.04;
+  font-weight: 700; font-stretch: 115%; letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums; overflow-wrap: anywhere;
+}
+.big small { margin-left: .1em; font-size: .36em; font-weight: 500; font-stretch: 100%; letter-spacing: 0; color: var(--ink-2); }
+.note { margin: 10px 0 0; color: var(--ink-2); max-width: 48ch; }
+.split { display: flex; height: 12px; margin: 18px 0 12px; border-radius: 999px; overflow: hidden; background: var(--track); }
+.split span { flex: none; display: block; height: 100%; transition: width .35s ease; }
+.split span + span { border-left: 2px solid var(--bg); }
+.fill-indigo { background: var(--indigo); }
+.fill-marigold { background: var(--marigold); }
+.fill-rose { background: var(--rose); }
+.stats { display: grid; gap: 4px; margin: 0; }
+.stats > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; min-width: 0; }
+.stats dt { display: flex; align-items: center; gap: 6px; font-size: .92rem; color: var(--ink-2); }
+.stats dd { margin: 0; font-size: 1.02rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (min-width: 560px) {
+  .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .stats > div { display: block; }
+  .stats dt { font-size: .85rem; }
+  .stats dd { margin-top: 2px; font-size: 1.05rem; }
+}
+.sw { flex: none; display: inline-block; width: 10px; height: 10px; border-radius: 3px; }
+.sw-line { width: 16px; height: 3px; border-radius: 2px; }
+.sw-dash { width: 16px; height: 0; border-radius: 0; border-top: 2px dashed var(--ink-2); }
+.sw-ring { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--ink); background: var(--surface); }
+
+.compare { margin-top: 18px; }
+.compare table { width: 100%; border-collapse: collapse; font-size: .95rem; font-variant-numeric: tabular-nums; }
+.compare th, .compare td { padding: 7px 0 7px 12px; text-align: right; font-weight: 400; border-bottom: 1px solid var(--line); }
+.compare thead th { font-size: .82rem; font-weight: 500; color: var(--ink-2); vertical-align: bottom; }
+.compare th[scope="row"] { padding-left: 0; text-align: left; color: var(--ink-2); }
+.compare td:last-child { font-weight: 600; }
+.compare tbody tr:last-child > * { border-bottom: 0; }
+
+/* Inputs */
+.inputs { min-width: 0; padding: 18px 16px 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
+.field + .field { margin-top: 20px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.row > label, .row > .lbl { font-weight: 500; }
+.num {
+  display: flex; align-items: center; gap: 4px; flex: 0 0 auto; width: 156px; padding: 0 10px;
+  background: var(--bg); border: 1px solid var(--line-2); border-radius: 10px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.num:focus-within { border-color: var(--indigo); box-shadow: 0 0 0 3px var(--indigo-soft); }
+.num.invalid { border-color: var(--rose); }
+.num input {
+  flex: 1 1 auto; width: 100%; min-width: 0; padding: 9px 0; border: 0; outline: none; background: transparent;
+  text-align: right; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.num .affix { flex: none; color: var(--ink-2); font-size: .92rem; white-space: nowrap; }
+.num.sm { width: 84px; }
+.num.month { width: auto; }
+.num.month input { text-align: left; min-width: 148px; }
+.hint { margin: 4px 0 0; font-size: .85rem; color: var(--ink-3); }
+.hint:empty { display: none; }
+.err { margin: 6px 0 0; font-size: .85rem; font-weight: 500; color: var(--rose); }
+
+input[type="range"] {
+  --pct: 50%;
+  -webkit-appearance: none; appearance: none; display: block;
+  width: 100%; height: 28px; margin: 8px 0 0; background: transparent; cursor: pointer;
+}
+input[type="range"]:focus-visible { outline: none; }
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 999px;
+  background: linear-gradient(to right, var(--indigo) 0 var(--pct), var(--track) var(--pct) 100%);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 22px; height: 22px; margin-top: -8px; border-radius: 50%;
+  background: var(--surface); border: 2px solid var(--indigo); box-shadow: 0 1px 3px rgba(22, 25, 58, .25);
+}
+input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 5px var(--indigo-soft); }
+input[type="range"]::-moz-range-track { height: 6px; border-radius: 999px; background: var(--track); }
+input[type="range"]::-moz-range-progress { height: 6px; border-radius: 999px; background: var(--indigo); }
+input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--surface); border: 2px solid var(--indigo); }
+input[type="range"]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 5px var(--indigo-soft); }
+
+/* Lump sums */
+.lumps { margin-top: 24px; padding-top: 18px; border-top: 1px dashed var(--line-2); }
+.lumps-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.lumps-head h3 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+.lumps-desc { margin: 6px 0 0; font-size: .9rem; color: var(--ink-2); }
+.btn {
+  appearance: none; -webkit-appearance: none; cursor: pointer; white-space: nowrap;
+  padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface);
+  color: var(--indigo); font-weight: 600;
+}
+.btn:hover { border-color: var(--indigo); }
+.lump { margin-top: 14px; padding: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; }
+.lump .num { background: var(--surface); }
+.lump .row + .row { margin-top: 10px; }
+.when { display: flex; gap: 6px; }
+.lump-foot { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 8px; }
+.lump-foot .hint { margin: 0; }
+.link {
+  appearance: none; border: 0; background: none; cursor: pointer; padding: 4px 0;
+  color: var(--rose); font-size: .88rem; font-weight: 500; text-decoration: underline; text-underline-offset: 2px;
+}
+
+/* Charts */
+.chart-block, .table-block { padding-top: 18px; border-top: 1px solid var(--line); }
+.section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+.section-head h2 { margin: 0; font-size: 1.1rem; font-weight: 600; }
+.readout { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; margin: 6px 0 0; min-height: 3em; align-content: flex-start; font-size: .9rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.readout strong { color: var(--ink); font-weight: 600; }
+.ro { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.chart { min-height: 200px; margin-top: 6px; border-radius: 8px; touch-action: pan-y; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; -webkit-user-select: none; user-select: none; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 0; padding: 0; list-style: none; font-size: .85rem; color: var(--ink-2); }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.legend li[hidden] { display: none; }
+.insight { margin: 12px 0 0; color: var(--ink-2); max-width: 60ch; }
+.insight:empty { display: none; }
+.c-grid { stroke: var(--line); stroke-width: 1; shape-rendering: crispEdges; }
+.c-axis { fill: var(--ink-3); font-size: 11px; font-family: var(--font); }
+.c-area-inv { fill: var(--indigo-soft); }
+.c-band-gain { fill: var(--marigold-soft); }
+.c-line-inv { fill: none; stroke: var(--indigo); stroke-width: 1.75; stroke-linejoin: round; }
+.c-line-val { fill: none; stroke: var(--marigold); stroke-width: 2.75; stroke-linejoin: round; stroke-linecap: round; }
+.c-line-sip { fill: none; stroke: var(--ink-2); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.c-area-bal { fill: var(--indigo-soft); }
+.c-line-bal { fill: none; stroke: var(--indigo); stroke-width: 2.5; stroke-linejoin: round; }
+.c-line-int { fill: none; stroke: var(--rose); stroke-width: 2.5; stroke-linejoin: round; }
+.c-marker { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+.c-guide { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 3 3; }
+.c-dot { stroke: var(--surface); stroke-width: 2; }
+.c-dot.k-val { fill: var(--marigold); }
+.c-dot.k-inv, .c-dot.k-bal { fill: var(--indigo); }
+.c-dot.k-sip { fill: var(--ink-2); }
+.c-dot.k-int { fill: var(--rose); }
+
+/* Tables */
+details.table-block > summary { cursor: pointer; font-size: 1.1rem; font-weight: 600; }
+.table-note { margin: 6px 0 10px; font-size: .88rem; color: var(--ink-2); }
+.table-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin: 12px 0 4px; }
+.row-inline { display: flex; align-items: center; gap: 8px; }
+.row-inline label { font-weight: 500; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.sched { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .92rem; font-variant-numeric: tabular-nums; }
+.sched th, .sched td { padding: 9px 14px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+.sched thead th { font-size: .8rem; font-weight: 500; line-height: 1.25; color: var(--ink-2); white-space: normal; vertical-align: bottom; }
+.sched th:first-child, .sched td:first-child { position: sticky; left: 0; z-index: 1; min-width: 0; text-align: left; background: var(--surface); }
+.sched tbody th { font-weight: 500; }
+.sched tbody tr:last-child > * { border-bottom: 0; }
+.sched tfoot > tr > * { font-weight: 600; border-top: 1px solid var(--line-2); border-bottom: 0; }
+.sub-cell { display: block; font-size: .75rem; font-weight: 400; color: var(--ink-3); }
+.meter { display: block; height: 4px; margin-top: 5px; overflow: hidden; border-radius: 2px; background: var(--track); }
+.meter i { display: block; height: 100%; border-radius: 2px; background: var(--indigo); }
+@media (max-width: 480px) {
+  .sched { font-size: .86rem; }
+  .sched th, .sched td { padding: 8px 7px; }
+  .sched th:first-child, .sched td:first-child { padding-left: 12px; }
+  .sched tr > :last-child { padding-right: 12px; }
+  .wide-only { display: none; }
+}
+
+/* Segmented choices */
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 3px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; }
+.seg label { position: relative; }
+.seg input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.seg span { display: block; padding: 5px 12px; border-radius: 999px; font-size: .88rem; font-weight: 500; color: var(--ink-2); }
+.seg input:checked + span { background: var(--ink); color: var(--on-ink); }
+.seg input:focus-visible + span { outline: 2px solid var(--indigo); outline-offset: 2px; }
+
+/* Method notes */
+.method { padding-top: 14px; border-top: 1px solid var(--line); color: var(--ink-2); font-size: .92rem; }
+.method summary { cursor: pointer; font-weight: 600; color: var(--ink); }
+.method p { margin: 10px 0 0; max-width: 70ch; }
+.method .seg { margin-top: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-    <div class="max-w-6xl mx-auto p-4 sm:p-6">
-        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
-            <div class="gradient-bg p-4 sm:p-6 text-white">
-                <div class="flex items-center gap-3">
-                    <svg class="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                    </svg>
-                    <h1 class="text-2xl sm:text-3xl font-bold">EMI Calculator</h1>
-                </div>
-                <p class="mt-2 opacity-90 text-sm sm:text-base">Calculate your loan EMI and payment schedule</p>
-            </div>
+<body>
+<main class="wrap">
+  <header class="top">
+    <h1>SIP and EMI calculator</h1>
+    <p>Project a systematic investment plan (SIP), with optional lump sums, or work out an equated monthly instalment (EMI) with a year-wise loan schedule.</p>
+  </header>
 
-            <div class="p-4 sm:p-6">
-                <div class="grid sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                    <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-gray-700">₹ Loan Amount (₹)</label>
-                        <input type="number" id="principal" placeholder="e.g., 500000" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" />
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-gray-700">📈 Interest Rate (% per annum)</label>
-                        <input type="number" step="0.1" id="rate" placeholder="e.g., 8.5" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" />
-                    </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-semibold text-gray-700">⏰ Loan Tenure (Years)</label>
-                        <input type="number" id="tenure" placeholder="e.g., 15" class="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors" />
-                    </div>
-                </div>
+  <div class="tabs" role="tablist" aria-label="Calculators">
+    <button type="button" class="tab" role="tab" id="tab-sip" data-tab="sip" aria-controls="panel-sip" aria-selected="true">SIP returns</button>
+    <button type="button" class="tab" role="tab" id="tab-emi" data-tab="emi" aria-controls="panel-emi" aria-selected="false" tabindex="-1">Loan EMI</button>
+  </div>
 
-                <div class="flex gap-4 mb-6 sm:mb-8">
-                    <button onclick="calculateEMI()" class="flex-1 gradient-bg text-white py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg">Calculate EMI</button>
-                    <button onclick="reset()" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors">Reset</button>
-                </div>
+  <!-- SIP -->
+  <section class="panel" id="panel-sip" data-panel="sip" role="tabpanel" aria-labelledby="tab-sip">
+    <div class="layout">
+      <div class="hero">
+        <p class="lead" id="sipLead"></p>
+        <p class="big" id="sipBig"></p>
+        <p class="note" id="sipNote" hidden></p>
+        <div class="split" aria-hidden="true"><span class="fill-indigo" id="sipSplitInv"></span><span class="fill-marigold" id="sipSplitGain"></span></div>
+        <dl class="stats">
+          <div><dt><i class="sw fill-indigo"></i>Invested</dt><dd id="sipInvested"></dd></div>
+          <div><dt><i class="sw fill-marigold"></i>Gains</dt><dd id="sipGains"></dd></div>
+          <div><dt><i class="sw"></i>Final value</dt><dd id="sipValue"></dd></div>
+        </dl>
+        <div class="compare" id="sipCompare" hidden></div>
+      </div>
 
-                <div id="results" class="hidden space-y-6">
-                    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="gradient-green text-white p-4 rounded-xl shadow-lg">
-                            <h3 class="text-sm font-semibold opacity-90">Monthly EMI</h3>
-                            <p id="monthlyEMI" class="text-xl sm:text-2xl font-bold">₹0</p>
-                        </div>
-                        <div class="gradient-blue text-white p-4 rounded-xl shadow-lg">
-                            <h3 class="text-sm font-semibold opacity-90">Principal Amount</h3>
-                            <p id="principalAmount" class="text-xl sm:text-2xl font-bold">₹0</p>
-                        </div>
-                        <div class="gradient-orange text-white p-4 rounded-xl shadow-lg">
-                            <h3 class="text-sm font-semibold opacity-90">Total Interest</h3>
-                            <p id="totalInterest" class="text-xl sm:text-2xl font-bold">₹0</p>
-                        </div>
-                        <div class="gradient-purple text-white p-4 rounded-xl shadow-lg">
-                            <h3 class="text-sm font-semibold opacity-90">Total Amount</h3>
-                            <p id="totalAmount" class="text-xl sm:text-2xl font-bold">₹0</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-50 rounded-xl p-4 sm:p-6">
-                        <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">Year-wise Payment Breakdown</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full bg-white rounded-lg shadow overflow-hidden text-sm">
-                                <thead class="bg-gradient-to-r from-gray-100 to-gray-200">
-                                    <tr>
-                                        <th class="px-2 sm:px-4 py-3 text-left font-semibold text-gray-700">Year</th>
-                                        <th class="px-2 sm:px-4 py-3 text-right font-semibold text-gray-700">Interest</th>
-                                        <th class="px-2 sm:px-4 py-3 text-right font-semibold text-gray-700">Principal</th>
-                                        <th class="px-2 sm:px-4 py-3 text-right font-semibold text-gray-700">Remaining</th>
-                                        <th class="px-2 sm:px-4 py-3 text-right font-semibold text-gray-700">Total Int.</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="yearlyBreakdown"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <div class="inputs">
+        <div class="field">
+          <div class="row">
+            <label for="sipAmount">Monthly SIP</label>
+            <div class="num"><span class="affix">₹</span><input id="sipAmount" inputmode="numeric" autocomplete="off" aria-describedby="sipAmountErr"></div>
+          </div>
+          <input type="range" id="sipAmountRange" aria-label="Monthly SIP">
+          <p class="err" id="sipAmountErr" hidden></p>
         </div>
+        <div class="field">
+          <div class="row">
+            <label for="sipRate">Expected return</label>
+            <div class="num"><input id="sipRate" inputmode="decimal" autocomplete="off" aria-describedby="sipRateErr"><span class="affix">% a year</span></div>
+          </div>
+          <input type="range" id="sipRateRange" aria-label="Expected return">
+          <p class="err" id="sipRateErr" hidden></p>
+        </div>
+        <div class="field">
+          <div class="row">
+            <label for="sipYears">Investment period</label>
+            <div class="num"><input id="sipYears" inputmode="decimal" autocomplete="off" aria-describedby="sipYearsHint sipYearsErr"><span class="affix">years</span></div>
+          </div>
+          <input type="range" id="sipYearsRange" aria-label="Investment period">
+          <p class="hint" id="sipYearsHint"></p>
+          <p class="err" id="sipYearsErr" hidden></p>
+        </div>
+
+        <div class="lumps">
+          <div class="lumps-head">
+            <h3>Lump sums</h3>
+            <button type="button" class="btn" id="addLump">Add a lump sum</button>
+          </div>
+          <p class="lumps-desc" id="lumpEmpty">Add a one-time investment at any point in the SIP to see what it adds.</p>
+          <div id="lumpList"></div>
+        </div>
+      </div>
+
+      <div class="chart-block">
+        <div class="section-head"><h2>Growth over the years</h2></div>
+        <p class="readout" id="sipReadout"></p>
+        <div class="chart" id="sipChart" tabindex="0" role="group" aria-label="Growth chart. Use the left and right arrow keys to step through the years."></div>
+        <ul class="legend">
+          <li><i class="sw sw-line fill-marigold"></i>Portfolio value</li>
+          <li><i class="sw sw-line fill-indigo"></i>Amount invested</li>
+          <li class="lump-only" hidden><i class="sw sw-dash"></i>SIP only</li>
+          <li class="lump-only" hidden><i class="sw sw-ring"></i>Lump sum added</li>
+        </ul>
+      </div>
+
+      <details class="table-block">
+        <summary>Year-by-year values</summary>
+        <p class="table-note">Amounts in ₹ at the end of each year.</p>
+        <div class="scroll"><table class="sched" id="sipTable"></table></div>
+      </details>
+
+      <details class="method">
+        <summary>How this is calculated</summary>
+        <p>Each SIP instalment is invested at the start of the month. A lump sum is invested at the start of the month you choose and grows until the end of the period. Returns compound every month.</p>
+        <div class="seg" role="radiogroup" aria-label="Monthly compounding">
+          <label><input type="radio" name="sipMode" value="nominal" id="sipModeNominal" checked><span>Annual rate ÷ 12</span></label>
+          <label><input type="radio" name="sipMode" value="cagr" id="sipModeCagr"><span>Exact annual return</span></label>
+        </div>
+        <p>Annual rate ÷ 12 matches most online SIP calculators. Exact annual return treats your rate as a compound annual growth rate (CAGR), which gives slightly lower figures.</p>
+        <p>Estimates only. Mutual fund returns are not guaranteed, and taxes and exit loads are not included.</p>
+      </details>
     </div>
+  </section>
 
-    <script>
-        // Register Service Worker for PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
+  <!-- EMI -->
+  <section class="panel" id="panel-emi" data-panel="emi" role="tabpanel" aria-labelledby="tab-emi" hidden>
+    <div class="layout">
+      <div class="hero">
+        <p class="lead" id="emiLead"></p>
+        <p class="big" id="emiBig"></p>
+        <p class="note" id="emiNote"></p>
+        <div class="split" aria-hidden="true"><span class="fill-indigo" id="emiSplitP"></span><span class="fill-rose" id="emiSplitI"></span></div>
+        <dl class="stats">
+          <div><dt><i class="sw fill-indigo"></i>Principal</dt><dd id="emiPrincipal"></dd></div>
+          <div><dt><i class="sw fill-rose"></i>Total interest</dt><dd id="emiInterest"></dd></div>
+          <div><dt><i class="sw"></i>Total payment</dt><dd id="emiTotal"></dd></div>
+        </dl>
+      </div>
 
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-                maximumFractionDigits: 0
-            }).format(amount);
-        }
+      <div class="inputs">
+        <div class="field">
+          <div class="row">
+            <label for="emiAmount">Loan amount</label>
+            <div class="num"><span class="affix">₹</span><input id="emiAmount" inputmode="numeric" autocomplete="off" aria-describedby="emiAmountHint emiAmountErr"></div>
+          </div>
+          <input type="range" id="emiAmountRange" aria-label="Loan amount">
+          <p class="hint" id="emiAmountHint"></p>
+          <p class="err" id="emiAmountErr" hidden></p>
+        </div>
+        <div class="field">
+          <div class="row">
+            <label for="emiRate">Interest rate</label>
+            <div class="num"><input id="emiRate" inputmode="decimal" autocomplete="off" aria-describedby="emiRateErr"><span class="affix">% a year</span></div>
+          </div>
+          <input type="range" id="emiRateRange" aria-label="Interest rate">
+          <p class="err" id="emiRateErr" hidden></p>
+        </div>
+        <div class="field">
+          <div class="row">
+            <label for="emiYears">Loan tenure</label>
+            <div class="num"><input id="emiYears" inputmode="decimal" autocomplete="off" aria-describedby="emiYearsHint emiYearsErr"><span class="affix">years</span></div>
+          </div>
+          <input type="range" id="emiYearsRange" aria-label="Loan tenure">
+          <p class="hint" id="emiYearsHint"></p>
+          <p class="err" id="emiYearsErr" hidden></p>
+        </div>
+      </div>
 
-        function calculateEMI() {
-            const principal = parseFloat(document.getElementById('principal').value);
-            const rate = parseFloat(document.getElementById('rate').value);
-            const tenure = parseFloat(document.getElementById('tenure').value);
+      <div class="chart-block">
+        <div class="section-head"><h2>Loan balance and interest over the years</h2></div>
+        <p class="readout" id="emiReadout"></p>
+        <div class="chart" id="emiChart" tabindex="0" role="group" aria-label="Loan chart. Use the left and right arrow keys to step through the years."></div>
+        <ul class="legend">
+          <li><i class="sw sw-line fill-indigo"></i>Principal left</li>
+          <li><i class="sw sw-line fill-rose"></i>Interest paid so far</li>
+        </ul>
+        <p class="insight" id="emiInsight"></p>
+      </div>
 
-            if (!principal || !rate || !tenure || principal <= 0 || rate <= 0 || tenure <= 0) {
-                alert('Please enter valid positive values');
-                return;
-            }
+      <div class="table-block">
+        <div class="section-head"><h2>Year-wise breakdown</h2></div>
+        <div class="table-controls">
+          <div class="row-inline">
+            <label for="emiStart">First EMI</label>
+            <div class="num month"><input type="month" id="emiStart" placeholder="YYYY-MM" aria-describedby="emiStartErr"></div>
+          </div>
+          <div class="seg" role="radiogroup" aria-label="Group rows by">
+            <label><input type="radio" name="emiGroup" value="loan" checked><span>Loan year</span></label>
+            <label><input type="radio" name="emiGroup" value="fy"><span>Financial year</span></label>
+            <label><input type="radio" name="emiGroup" value="cal"><span>Calendar year</span></label>
+          </div>
+        </div>
+        <p class="err" id="emiStartErr" hidden></p>
+        <p class="table-note">Amounts in ₹. Remaining principal is the balance after the last EMI in each period.</p>
+        <div class="scroll"><table class="sched" id="emiTable"></table></div>
+      </div>
 
-            const r = rate / 100 / 12;
-            const n = tenure * 12;
-            const emi = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-            const totalAmount = emi * n;
-            const totalInterest = totalAmount - principal;
+      <details class="method">
+        <summary>How this is calculated</summary>
+        <p>EMI = P × r × (1 + r)<sup>n</sup> ÷ ((1 + r)<sup>n</sup> − 1), where P is the loan amount, r is the monthly rate (annual rate ÷ 12) and n is the number of EMIs.</p>
+        <p>Each month, interest is charged on the principal still owed and the rest of the EMI reduces the principal. Assumes a fixed rate with no prepayments or fees. A lender's schedule can differ by a few rupees because of rounding.</p>
+      </details>
+    </div>
+  </section>
+</main>
 
-            document.getElementById('monthlyEMI').textContent = formatCurrency(emi);
-            document.getElementById('principalAmount').textContent = formatCurrency(principal);
-            document.getElementById('totalInterest').textContent = formatCurrency(totalInterest);
-            document.getElementById('totalAmount').textContent = formatCurrency(totalAmount);
+<script>
+(() => {
+  'use strict';
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 
-            let remainingPrincipal = principal;
-            let totalInterestPaid = 0;
-            const breakdown = [];
+  /* ---------- Formatting ---------- */
+  const INT = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
+  const DEC = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 });
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const isNum = v => typeof v === 'number' && Number.isFinite(v);
+  const rs = n => '₹' + INT.format(Math.round(n));
+  const num = n => INT.format(Math.round(n));
+  const pct = v => DEC.format(v) + '%';
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
-            for (let year = 1; year <= tenure; year++) {
-                let yearlyInterest = 0;
-                let yearlyPrincipal = 0;
-                
-                for (let month = 1; month <= 12; month++) {
-                    const monthlyInterest = remainingPrincipal * r;
-                    const monthlyPrincipal = emi - monthlyInterest;
-                    yearlyInterest += monthlyInterest;
-                    yearlyPrincipal += monthlyPrincipal;
-                    remainingPrincipal -= monthlyPrincipal;
-                    if (remainingPrincipal < 0) remainingPrincipal = 0;
-                }
-                
-                totalInterestPaid += yearlyInterest;
-                breakdown.push({
-                    year, yearlyInterest, yearlyPrincipal,
-                    remainingPrincipal: Math.max(0, remainingPrincipal),
-                    cumulativeInterest: totalInterestPaid
-                });
-            }
+  function words(n) {
+    const a = Math.abs(n);
+    if (a >= 9999500) return '₹' + DEC.format(a / 1e7) + ' crore';
+    if (a >= 99999.5) return '₹' + DEC.format(a / 1e5) + ' lakh';
+    return '₹' + INT.format(Math.round(a));
+  }
+  function compact(n) {
+    if (n >= 1e7) return '₹' + DEC.format(n / 1e7) + 'Cr';
+    if (n >= 1e5) return '₹' + DEC.format(n / 1e5) + 'L';
+    if (n >= 1e3) return '₹' + DEC.format(n / 1e3) + 'K';
+    return '₹' + DEC.format(n);
+  }
+  function span(m) {
+    const y = Math.floor(m / 12), r = m % 12, parts = [];
+    if (y) parts.push(y + (y === 1 ? ' year' : ' years'));
+    if (r) parts.push(r + (r === 1 ? ' month' : ' months'));
+    return parts.join(' ') || '0 months';
+  }
+  function spanShort(m) {
+    const y = Math.floor(m / 12), r = m % 12;
+    if (!y) return r + ' mo';
+    return y + (y === 1 ? ' yr' : ' yrs') + (r ? ' ' + r + ' mo' : '');
+  }
+  function parseNum(v) {
+    const s = String(v).replace(/[₹,\s]/g, '');
+    if (!/^-?(\d+\.?\d*|\.\d+)$/.test(s)) return NaN;
+    return Number(s);
+  }
 
-            const tbody = document.getElementById('yearlyBreakdown');
-            tbody.innerHTML = '';
-            
-            breakdown.forEach((yearData, index) => {
-                const row = document.createElement('tr');
-                row.className = index % 2 === 0 ? 'bg-gray-50' : 'bg-white';
-                row.innerHTML = `
-                    <td class="px-2 sm:px-4 py-3 font-semibold text-gray-800">${yearData.year}</td>
-                    <td class="px-2 sm:px-4 py-3 text-right font-mono text-orange-600 text-xs sm:text-sm">${formatCurrency(yearData.yearlyInterest)}</td>
-                    <td class="px-2 sm:px-4 py-3 text-right font-mono text-green-600 text-xs sm:text-sm">${formatCurrency(yearData.yearlyPrincipal)}</td>
-                    <td class="px-2 sm:px-4 py-3 text-right font-mono text-blue-600 text-xs sm:text-sm">${formatCurrency(yearData.remainingPrincipal)}</td>
-                    <td class="px-2 sm:px-4 py-3 text-right font-mono text-purple-600 text-xs sm:text-sm">${formatCurrency(yearData.cumulativeInterest)}</td>
-                `;
-                tbody.appendChild(row);
-            });
+  /* ---------- Per-viewer memory of inputs ---------- */
+  const KEY = 'sip-emi-calculator:v1';
+  const loadState = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } };
+  const saveState = s => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { /* storage unavailable */ } };
 
-            document.getElementById('results').classList.remove('hidden');
-        }
+  /* ---------- Shared state ---------- */
+  let currentTab = 'sip';
+  let lumps = [];
+  let lumpSeq = 0;
+  const MAX_LUMPS = 6;
+  const sipLayout = $('#panel-sip .layout');
+  const emiLayout = $('#panel-emi .layout');
 
-        function reset() {
-            document.getElementById('principal').value = '';
-            document.getElementById('rate').value = '';
-            document.getElementById('tenure').value = '';
-            document.getElementById('results').classList.add('hidden');
-        }
-    </script>
+  /* ---------- Number field + slider pair ---------- */
+  function niceRound(v) {
+    if (!(v > 0)) return 0;
+    const step = Math.pow(10, Math.floor(Math.log10(v)) - 1) / 2;
+    return Math.max(step, Math.round(v / step) * step);
+  }
+  function makeField(id, cfg) {
+    const input = document.getElementById(id);
+    const box = input.closest('.num');
+    const range = document.getElementById(id + 'Range');
+    const err = document.getElementById(id + 'Err');
+    const f = { input, value: NaN, valid: false };
+    const show = v => (cfg.kind === 'money' ? INT : DEC).format(v);
+    const unit = v => cfg.kind === 'money' ? rs(v) : cfg.kind === 'pct' ? pct(v) : DEC.format(v) + ' years';
+    if (cfg.log) { range.min = '0'; range.max = '1000'; range.step = '1'; }
+    else { range.min = String(cfg.sMin); range.max = String(cfg.sMax); range.step = String(cfg.step); }
+    const lo = Number(range.min), hi = Number(range.max);
+    const toSlider = v => cfg.log ? 1000 * Math.log(Math.max(v, cfg.sMin) / cfg.sMin) / Math.log(cfg.sMax / cfg.sMin) : v;
+    const fromSlider = s => cfg.log ? niceRound(cfg.sMin * Math.pow(cfg.sMax / cfg.sMin, s / 1000)) : Number(s);
+    function syncSlider() {
+      if (!isNum(f.value)) return;
+      const s = Math.min(hi, Math.max(lo, toSlider(f.value)));
+      range.value = String(s);
+      range.style.setProperty('--pct', ((s - lo) / (hi - lo) * 100).toFixed(2) + '%');
+    }
+    function validate() {
+      const v = f.value;
+      let msg = '';
+      if (!isNum(v)) msg = 'Enter a number.';
+      else if (v < cfg.min) msg = 'Enter ' + unit(cfg.min) + ' or more.';
+      else if (v > cfg.max) msg = 'Enter ' + unit(cfg.max) + ' or less.';
+      f.valid = !msg;
+      err.textContent = msg;
+      err.hidden = !msg;
+      box.classList.toggle('invalid', !!msg);
+      input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    }
+    f.set = v => { f.value = v; input.value = isNum(v) ? show(v) : ''; syncSlider(); validate(); };
+    input.addEventListener('input', () => { f.value = parseNum(input.value); syncSlider(); validate(); cfg.onChange(); });
+    input.addEventListener('blur', () => { if (isNum(f.value)) input.value = show(f.value); });
+    range.addEventListener('input', () => { f.value = fromSlider(range.value); input.value = show(f.value); syncSlider(); validate(); cfg.onChange(); });
+    return f;
+  }
+
+  const sipAmount = makeField('sipAmount', { kind: 'money', min: 100, max: 1e8, sMin: 500, sMax: 500000, log: true, onChange: () => calcSip() });
+  const sipRate = makeField('sipRate', { kind: 'pct', min: 0, max: 50, sMin: 1, sMax: 30, step: 0.5, onChange: () => calcSip() });
+  const sipYears = makeField('sipYears', { kind: 'years', min: 0.5, max: 50, sMin: 1, sMax: 40, step: 1, onChange: () => calcSip() });
+  const emiAmount = makeField('emiAmount', { kind: 'money', min: 1000, max: 1e10, sMin: 100000, sMax: 50000000, log: true, onChange: () => calcEmi() });
+  const emiRate = makeField('emiRate', { kind: 'pct', min: 0, max: 40, sMin: 1, sMax: 20, step: 0.05, onChange: () => calcEmi() });
+  const emiYears = makeField('emiYears', { kind: 'years', min: 0.5, max: 40, sMin: 1, sMax: 30, step: 1, onChange: () => calcEmi() });
+
+  /* ---------- Chart (inline SVG) ---------- */
+  function niceTicks(max, count) {
+    if (!(max > 0)) return [0, 1];
+    const raw = max / count;
+    const p = Math.pow(10, Math.floor(Math.log10(raw)));
+    const f = raw / p;
+    const step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p;
+    const n = Math.ceil(max / step - 1e-9);
+    const out = [];
+    for (let k = 0; k <= n; k++) out.push(k * step);
+    return out;
+  }
+  function renderChart(host, spec) {
+    host._spec = spec;
+    const W = Math.floor(host.clientWidth);
+    host._w = W;
+    if (!W) return; // hidden tab: drawn when it becomes visible
+    const narrow = W < 520;
+    const H = narrow ? 220 : 270;
+    const pad = { l: narrow ? 50 : 58, r: 10, t: 10, b: 26 };
+    const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+    const pts = spec.points, last = pts.length - 1, xMax = pts[last].x || 1;
+    let maxY = 0;
+    for (const p of pts) for (const k of spec.yKeys) if (p[k] > maxY) maxY = p[k];
+    const ticks = niceTicks(maxY, narrow ? 4 : 5);
+    const top = ticks[ticks.length - 1] || 1;
+    const f1 = v => v.toFixed(1);
+    const X = x => pad.l + (x / xMax) * iw;
+    const Y = y => pad.t + ih - (y / top) * ih;
+    const line = key => pts.map((p, j) => (j ? 'L' : 'M') + f1(X(p.x)) + ' ' + f1(Y(p[key]))).join('');
+
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(spec.label)}">`;
+    for (const t of ticks) {
+      const y = f1(Y(t));
+      s += `<line class="c-grid" x1="${pad.l}" x2="${W - pad.r}" y1="${y}" y2="${y}"/>`;
+      s += `<text class="c-axis" x="${pad.l - 8}" y="${y}" text-anchor="end" dominant-baseline="middle">${t === 0 ? '0' : compact(t)}</text>`;
+    }
+    const yrs = xMax / 12;
+    const stepY = [0.5, 1, 2, 5, 10, 20].find(st => yrs / st <= (narrow ? 5 : 9)) || 25;
+    for (let k = 0; k * stepY * 12 <= xMax + 1e-6; k++) {
+      s += `<text class="c-axis" x="${f1(X(k * stepY * 12))}" y="${H - 6}" text-anchor="middle">${DEC.format(k * stepY)}</text>`;
+    }
+    const x0 = f1(X(pts[0].x)), xl = f1(X(pts[last].x)), yb = f1(Y(0));
+    for (const L of spec.layers) {
+      if (L.type === 'area') {
+        s += `<path class="${L.cls}" d="${line(L.key)}L${xl} ${yb}L${x0} ${yb}Z"/>`;
+      } else if (L.type === 'band') {
+        let d = line(L.hi);
+        for (let j = last; j >= 0; j--) d += 'L' + f1(X(pts[j].x)) + ' ' + f1(Y(pts[j][L.lo]));
+        s += `<path class="${L.cls}" d="${d}Z"/>`;
+      } else {
+        s += `<path class="${L.cls}" d="${line(L.key)}"/>`;
+      }
+    }
+    for (const m of spec.markers) s += `<circle class="c-marker" cx="${f1(X(m.x))}" cy="${f1(Y(m.y))}" r="5"><title>${esc(m.title)}</title></circle>`;
+    s += `<g class="c-scrub" visibility="hidden"><line class="c-guide" y1="${pad.t}" y2="${pad.t + ih}"/>`;
+    for (const d of spec.dots) s += `<circle class="c-dot ${d.cls}" r="4.5"/>`;
+    s += '</g></svg>';
+    host.innerHTML = s;
+
+    const svg = host.firstElementChild;
+    const g = svg.querySelector('.c-scrub'), guide = g.firstElementChild, dots = g.querySelectorAll('circle');
+    const show = j => {
+      const p = pts[j], x = f1(X(p.x));
+      guide.setAttribute('x1', x);
+      guide.setAttribute('x2', x);
+      spec.dots.forEach((d, k) => { dots[k].setAttribute('cx', x); dots[k].setAttribute('cy', f1(Y(p[d.key]))); });
+      g.setAttribute('visibility', 'visible');
+      spec.out.innerHTML = spec.readout(p);
+      host._j = j;
+    };
+    const reset = () => { g.setAttribute('visibility', 'hidden'); spec.out.innerHTML = spec.readout(pts[last]); host._j = null; };
+    const indexAt = clientX => {
+      const r = svg.getBoundingClientRect();
+      const px = (clientX - r.left) * (W / r.width);
+      return Math.max(0, Math.min(last, Math.round((px - pad.l) / iw * xMax)));
+    };
+    svg.addEventListener('pointerdown', e => show(indexAt(e.clientX)));
+    svg.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' || e.buttons) show(indexAt(e.clientX)); });
+    svg.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') reset(); });
+    host.onkeydown = e => {
+      let j = host._j == null ? last : host._j;
+      const step = e.shiftKey ? 1 : 12;
+      if (e.key === 'ArrowRight') j = Math.min(last, j + step);
+      else if (e.key === 'ArrowLeft') j = Math.max(0, j - step);
+      else if (e.key === 'Home') j = 0;
+      else if (e.key === 'End') j = last;
+      else if (e.key === 'Escape') { reset(); return; }
+      else return;
+      e.preventDefault();
+      show(j);
+    };
+    reset();
+  }
+
+  /* ---------- SIP ---------- */
+  function sipMode() { const r = $('input[name="sipMode"]:checked'); return r ? r.value : 'nominal'; }
+  function monthlyRate(annualPct, mode) {
+    const r = annualPct / 100;
+    return mode === 'cagr' ? Math.pow(1 + r, 1 / 12) - 1 : r / 12;
+  }
+  function simulateSip(monthly, rate, N, used, mode) {
+    const i = monthlyRate(rate, mode);
+    const at = new Map();
+    for (const u of used) at.set(u.m, (at.get(u.m) || 0) + u.amount);
+    let v = 0, inv = 0, v0 = 0;
+    const series = [{ x: 0, v: 0, inv: 0, v0: 0 }];
+    const rows = [];
+    for (let m = 0; m < N; m++) {
+      v += monthly; inv += monthly; v0 += monthly;
+      const extra = at.get(m);
+      if (extra) { v += extra; inv += extra; }
+      v *= 1 + i; v0 *= 1 + i;
+      series.push({ x: m + 1, v, inv, v0 });
+      if ((m + 1) % 12 === 0 || m === N - 1) rows.push({ year: Math.ceil((m + 1) / 12), months: (m % 12) + 1, inv, v, gains: v - inv, v0 });
+    }
+    const growth = used.map(u => ({ ...u, fv: u.amount * Math.pow(1 + i, N - u.m), months: N - u.m }));
+    return {
+      N, monthly, rate, invested: inv, value: v, gains: v - inv,
+      sipInvested: monthly * N, sipValue: v0, rows, series, growth,
+      lumpTotal: used.reduce((a, u) => a + u.amount, 0)
+    };
+  }
+
+  function addLump(data, focus) {
+    const id = ++lumpSeq;
+    const el = document.createElement('div');
+    el.className = 'lump';
+    el.innerHTML = `
+      <div class="row">
+        <label for="lumpAmt${id}">Lump sum</label>
+        <div class="num"><span class="affix">₹</span><input id="lumpAmt${id}" inputmode="numeric" autocomplete="off" aria-describedby="lumpErr${id} lumpHint${id}"></div>
+      </div>
+      <div class="row">
+        <span class="lbl" id="lumpWhen${id}">Invest after</span>
+        <div class="when" role="group" aria-labelledby="lumpWhen${id}">
+          <div class="num sm"><input id="lumpY${id}" inputmode="numeric" autocomplete="off" aria-label="Years"><span class="affix">yrs</span></div>
+          <div class="num sm"><input id="lumpM${id}" inputmode="numeric" autocomplete="off" aria-label="Months"><span class="affix">mo</span></div>
+        </div>
+      </div>
+      <p class="err" id="lumpErr${id}" hidden></p>
+      <div class="lump-foot">
+        <p class="hint" id="lumpHint${id}"></p>
+        <button type="button" class="link">Remove</button>
+      </div>`;
+    const item = {
+      amount: data.amount, y: data.y, mo: data.mo, el,
+      amt: el.querySelector('#lumpAmt' + id), yr: el.querySelector('#lumpY' + id), mn: el.querySelector('#lumpM' + id),
+      err: el.querySelector('#lumpErr' + id), hint: el.querySelector('#lumpHint' + id)
+    };
+    item.amt.value = isNum(item.amount) ? INT.format(item.amount) : '';
+    item.yr.value = isNum(item.y) ? String(item.y) : '0';
+    item.mn.value = isNum(item.mo) ? String(item.mo) : '0';
+    item.amt.addEventListener('input', () => { item.amount = parseNum(item.amt.value); calcSip(); });
+    item.amt.addEventListener('blur', () => { if (isNum(item.amount)) item.amt.value = INT.format(item.amount); });
+    item.yr.addEventListener('input', () => { item.y = item.yr.value.trim() === '' ? 0 : parseNum(item.yr.value); calcSip(); });
+    item.mn.addEventListener('input', () => { item.mo = item.mn.value.trim() === '' ? 0 : parseNum(item.mn.value); calcSip(); });
+    el.querySelector('.link').addEventListener('click', () => {
+      lumps = lumps.filter(l => l !== item);
+      el.remove();
+      updateLumpUi();
+      calcSip();
+      $('#addLump').focus();
+    });
+    lumps.push(item);
+    $('#lumpList').appendChild(el);
+    updateLumpUi();
+    if (focus) item.amt.focus();
+  }
+  function updateLumpUi() {
+    $('#addLump').hidden = lumps.length >= MAX_LUMPS;
+    $('#lumpEmpty').hidden = lumps.length > 0;
+  }
+  function checkLump(l, N) {
+    const amtOk = isNum(l.amount) && l.amount > 0 && l.amount <= 1e11;
+    const yOk = isNum(l.y) && Number.isInteger(l.y) && l.y >= 0;
+    const mOk = isNum(l.mo) && Number.isInteger(l.mo) && l.mo >= 0 && l.mo <= 11;
+    const within = !(yOk && mOk && N != null) || l.y * 12 + l.mo < N;
+    let msg = '';
+    if (!amtOk) msg = 'Enter an amount above ₹0.';
+    else if (!yOk) msg = 'Years must be a whole number.';
+    else if (!mOk) msg = 'Months must be a whole number from 0 to 11.';
+    else if (!within) msg = `Choose a time before the SIP ends at ${span(N)}.`;
+    l.err.textContent = msg;
+    l.err.hidden = !msg;
+    l.amt.closest('.num').classList.toggle('invalid', !amtOk);
+    l.yr.closest('.num').classList.toggle('invalid', !yOk || !within);
+    l.mn.closest('.num').classList.toggle('invalid', !mOk || !within);
+    if (msg) l.hint.textContent = 'Not included in the result.';
+    return !msg;
+  }
+
+  function calcSip() {
+    const N = sipYears.valid ? Math.max(1, Math.round(sipYears.value * 12)) : null;
+    $('#sipYearsHint').textContent = N ? `${N} monthly ${N === 1 ? 'instalment' : 'instalments'}` : '';
+    const used = [];
+    for (const l of lumps) if (checkLump(l, N)) used.push({ item: l, amount: l.amount, m: l.y * 12 + l.mo });
+    const ok = sipAmount.valid && sipRate.valid && sipYears.valid;
+    sipLayout.classList.toggle('is-stale', !ok);
+    if (ok) renderSip(simulateSip(sipAmount.value, sipRate.value, N, used, sipMode()), used);
+    persist();
+  }
+
+  function renderSip(res, used) {
+    const has = used.length > 0, one = used.length === 1;
+    const base = `<strong>${rs(res.monthly)}</strong> a month for <strong>${span(res.N)}</strong> at <strong>${pct(res.rate)}</strong> a year`;
+    $('#sipLead').innerHTML = has
+      ? `${base}, plus <strong>${words(res.lumpTotal)}</strong> in ${one ? 'a lump sum' : used.length + ' lump sums'}, could grow to`
+      : `${base} could grow to`;
+    $('#sipBig').textContent = words(res.value);
+
+    const note = $('#sipNote');
+    if (has) {
+      const fv = res.growth.reduce((a, g) => a + g.fv, 0);
+      note.innerHTML = `Your ${one ? 'lump sum grows' : 'lump sums grow'} to <strong>${words(fv)}</strong> by the end, a gain of <strong>${words(fv - res.lumpTotal)}</strong>.`;
+    }
+    note.hidden = !has;
+
+    const invShare = res.value > 0 ? Math.min(100, res.invested / res.value * 100) : 100;
+    $('#sipSplitInv').style.width = invShare.toFixed(2) + '%';
+    $('#sipSplitGain').style.width = (100 - invShare).toFixed(2) + '%';
+    $('#sipInvested').textContent = rs(res.invested);
+    $('#sipGains').textContent = rs(res.gains);
+    $('#sipValue').textContent = rs(res.value);
+
+    const cmp = $('#sipCompare');
+    if (has) {
+      cmp.innerHTML = `<table>
+        <thead><tr><td></td><th scope="col">SIP only</th><th scope="col">With ${one ? 'lump sum' : 'lump sums'}</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">You invest</th><td>${rs(res.sipInvested)}</td><td>${rs(res.invested)}</td></tr>
+          <tr><th scope="row">Final value</th><td>${rs(res.sipValue)}</td><td>${rs(res.value)}</td></tr>
+          <tr><th scope="row">Gains</th><td>${rs(res.sipValue - res.sipInvested)}</td><td>${rs(res.gains)}</td></tr>
+        </tbody></table>`;
+    }
+    cmp.hidden = !has;
+    res.growth.forEach(g => { g.item.hint.textContent = `Grows for ${span(g.months)} to ${words(g.fv)}.`; });
+    $$('#panel-sip .lump-only').forEach(el => { el.hidden = !has; });
+
+    renderChart($('#sipChart'), {
+      points: res.series,
+      yKeys: has ? ['v', 'inv', 'v0'] : ['v', 'inv'],
+      layers: [
+        { type: 'area', key: 'inv', cls: 'c-area-inv' },
+        { type: 'band', lo: 'inv', hi: 'v', cls: 'c-band-gain' },
+        { type: 'line', key: 'inv', cls: 'c-line-inv' },
+        ...(has ? [{ type: 'line', key: 'v0', cls: 'c-line-sip' }] : []),
+        { type: 'line', key: 'v', cls: 'c-line-val' }
+      ],
+      dots: [{ key: 'v', cls: 'k-val' }, { key: 'inv', cls: 'k-inv' }, ...(has ? [{ key: 'v0', cls: 'k-sip' }] : [])],
+      markers: used.map(u => ({
+        x: u.m + 1, y: res.series[u.m + 1].inv,
+        title: `Lump sum of ${rs(u.amount)} ${u.m === 0 ? 'at the start' : 'after ' + spanShort(u.m)}`
+      })),
+      out: $('#sipReadout'),
+      label: `Portfolio value and amount invested over ${span(res.N)}`,
+      readout: p => `<span>${p.x === 0 ? 'At the start' : 'After ' + spanShort(p.x)}:</span>`
+        + `<span class="ro"><i class="sw fill-marigold"></i>Value <strong>${words(p.v)}</strong></span>`
+        + `<span class="ro"><i class="sw fill-indigo"></i>Invested <strong>${words(p.inv)}</strong></span>`
+        + (has ? `<span class="ro"><i class="sw sw-dash"></i>SIP only <strong>${words(p.v0)}</strong></span>` : '')
+    });
+
+    let h = `<thead><tr><th scope="col">Year</th><th scope="col">Invested</th><th scope="col">Gains</th><th scope="col">Value</th>${has ? '<th scope="col">SIP only value</th>' : ''}</tr></thead><tbody>`;
+    for (const r of res.rows) {
+      h += `<tr><th scope="row">${r.year}${r.months < 12 ? `<span class="sub-cell">${r.months} mo</span>` : ''}</th>`
+        + `<td>${num(r.inv)}</td><td>${num(r.gains)}</td><td>${num(r.v)}</td>${has ? `<td>${num(r.v0)}</td>` : ''}</tr>`;
+    }
+    $('#sipTable').innerHTML = h + '</tbody>';
+  }
+
+  /* ---------- EMI ---------- */
+  function emiGroup() { const r = $('input[name="emiGroup"]:checked'); return r ? r.value : 'loan'; }
+  function nextMonth() {
+    const d = new Date();
+    let y = d.getFullYear(), m = d.getMonth() + 1;
+    if (m > 11) { m = 0; y += 1; }
+    return { y, m };
+  }
+  let startGood = nextMonth();
+  function readStart() {
+    const el = $('#emiStart'), err = $('#emiStartErr');
+    const mt = /^(\d{4})-(\d{1,2})$/.exec(el.value.trim());
+    let msg = '';
+    if (!mt) msg = 'Enter the month as YYYY-MM, for example 2026-10.';
+    else {
+      const y = Number(mt[1]), m = Number(mt[2]) - 1;
+      if (m < 0 || m > 11 || y < 1950 || y > 2200) msg = 'Enter a real month, for example 2026-10.';
+      else startGood = { y, m };
+    }
+    err.textContent = msg;
+    err.hidden = !msg;
+    el.closest('.num').classList.toggle('invalid', !!msg);
+    return startGood;
+  }
+  function amortise(P, rate, n) {
+    const r = rate / 100 / 12;
+    const emi = r === 0 ? P / n : P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+    let bal = P, cumInt = 0;
+    const months = [];
+    for (let k = 0; k < n; k++) {
+      const interest = bal * r;
+      const prin = k === n - 1 ? bal : emi - interest;
+      bal = Math.max(0, bal - prin);
+      cumInt += interest;
+      months.push({ k, interest, prin, bal, cumInt });
+    }
+    return { P, rate, n, emi, totalInterest: cumInt, total: P + cumInt, months };
+  }
+  function groupRows(res, start, mode) {
+    const out = [];
+    let cur = null;
+    for (const row of res.months) {
+      const abs = start.m + row.k, y = start.y + Math.floor(abs / 12), mo = abs % 12;
+      let key, label;
+      if (mode === 'fy') { const fy = mo >= 3 ? y : y - 1; key = fy; label = '<span class="wide-only">FY </span>' + fy + '-' + String((fy + 1) % 100).padStart(2, '0'); }
+      else if (mode === 'cal') { key = y; label = String(y); }
+      else { key = Math.floor(row.k / 12) + 1; label = 'Year ' + key; }
+      if (!cur || cur.key !== key) { cur = { key, label, count: 0, prin: 0, int: 0, bal: 0, from: { y, mo }, to: { y, mo } }; out.push(cur); }
+      cur.count++;
+      cur.prin += row.prin;
+      cur.int += row.interest;
+      cur.bal = row.bal;
+      cur.to = { y, mo };
+    }
+    return out;
+  }
+
+  function calcEmi() {
+    const n = emiYears.valid ? Math.max(1, Math.round(emiYears.value * 12)) : null;
+    $('#emiYearsHint').textContent = n ? `${n} monthly ${n === 1 ? 'EMI' : 'EMIs'}` : '';
+    $('#emiAmountHint').textContent = emiAmount.valid && emiAmount.value >= 99999.5 ? words(emiAmount.value) : '';
+    const start = readStart();
+    const ok = emiAmount.valid && emiRate.valid && emiYears.valid;
+    emiLayout.classList.toggle('is-stale', !ok);
+    if (ok) renderEmi(amortise(emiAmount.value, emiRate.value, n), start);
+    persist();
+  }
+
+  function renderEmi(res, start) {
+    $('#emiLead').innerHTML = `Your EMI for a <strong>${words(res.P)}</strong> loan at <strong>${pct(res.rate)}</strong> over <strong>${span(res.n)}</strong> is`;
+    $('#emiBig').innerHTML = `${rs(res.emi)} <small>a month</small>`;
+    $('#emiNote').innerHTML = `Across ${res.n} ${res.n === 1 ? 'EMI' : 'EMIs'} you pay <strong>${words(res.totalInterest)}</strong> in interest, <strong>${words(res.total)}</strong> in total.`;
+    const pShare = res.total > 0 ? res.P / res.total * 100 : 100;
+    $('#emiSplitP').style.width = pShare.toFixed(2) + '%';
+    $('#emiSplitI').style.width = (100 - pShare).toFixed(2) + '%';
+    $('#emiPrincipal').textContent = rs(res.P);
+    $('#emiInterest').textContent = rs(res.totalInterest);
+    $('#emiTotal').textContent = rs(res.total);
+
+    const kx = res.months.findIndex(m => m.prin >= m.interest);
+    let insight = '';
+    if (kx === 0) insight = 'From the first EMI, more of each payment goes to principal than to interest.';
+    else if (kx > 0) {
+      const abs = start.m + kx;
+      insight = `From EMI ${kx + 1} (${MON[abs % 12]} ${start.y + Math.floor(abs / 12)}), more of each payment goes to principal than to interest.`;
+    }
+    $('#emiInsight').textContent = insight;
+
+    const pts = [{ x: 0, bal: res.P, ci: 0 }].concat(res.months.map(m => ({ x: m.k + 1, bal: m.bal, ci: m.cumInt })));
+    renderChart($('#emiChart'), {
+      points: pts,
+      yKeys: ['bal', 'ci'],
+      layers: [
+        { type: 'area', key: 'bal', cls: 'c-area-bal' },
+        { type: 'line', key: 'bal', cls: 'c-line-bal' },
+        { type: 'line', key: 'ci', cls: 'c-line-int' }
+      ],
+      dots: [{ key: 'bal', cls: 'k-bal' }, { key: 'ci', cls: 'k-int' }],
+      markers: [],
+      out: $('#emiReadout'),
+      label: `Principal left and interest paid over ${span(res.n)}`,
+      readout: p => `<span>${p.x === 0 ? 'At the start' : 'After ' + spanShort(p.x)}:</span>`
+        + `<span class="ro"><i class="sw fill-indigo"></i>Principal left <strong>${words(p.bal)}</strong></span>`
+        + `<span class="ro"><i class="sw fill-rose"></i>Interest paid <strong>${words(p.ci)}</strong></span>`
+    });
+
+    const mode = emiGroup();
+    const groups = groupRows(res, start, mode);
+    const ml = p => MON[p.mo] + ' ’' + String(p.y).slice(-2);
+    const colName = mode === 'fy' ? 'Financial year' : mode === 'cal' ? 'Calendar year' : 'Loan year';
+    let h = `<thead><tr><th scope="col">${colName}</th><th scope="col">Principal paid</th><th scope="col">Interest paid</th><th scope="col">Remaining principal</th></tr></thead><tbody>`;
+    for (const g of groups) {
+      let sub = '';
+      if (mode === 'loan') sub = g.count === 1 ? ml(g.from) : `${ml(g.from)}<span class="wide-only"> – ${ml(g.to)}</span>`;
+      else if (g.count < 12) sub = `${g.count} ${g.count === 1 ? 'EMI' : 'EMIs'}`;
+      const left = res.P > 0 ? Math.max(0, Math.min(100, g.bal / res.P * 100)) : 0;
+      h += `<tr><th scope="row">${g.label}${sub ? `<span class="sub-cell">${sub}</span>` : ''}</th>`
+        + `<td>${num(g.prin)}</td><td>${num(g.int)}</td>`
+        + `<td>${num(g.bal)}<span class="meter" aria-hidden="true"><i data-w="${left.toFixed(1)}"></i></span></td></tr>`;
+    }
+    h += `</tbody><tfoot><tr><th scope="row">Total</th><td>${num(res.P)}</td><td>${num(res.totalInterest)}</td><td></td></tr></tfoot>`;
+    const table = $('#emiTable');
+    table.innerHTML = h;
+    $$('.meter i', table).forEach(i => { i.style.width = i.dataset.w + '%'; });
+  }
+
+  /* ---------- Tabs ---------- */
+  const tabs = $$('.tab');
+  function setTab(name, focus) {
+    currentTab = name;
+    tabs.forEach(t => {
+      const on = t.dataset.tab === name;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      if (on && focus) t.focus();
+    });
+    $$('.panel').forEach(p => { p.hidden = p.dataset.panel !== name; });
+    if (!('ResizeObserver' in window)) requestAnimationFrame(redrawCharts);
+    persist();
+  }
+  tabs.forEach(t => t.addEventListener('click', () => setTab(t.dataset.tab, false)));
+  $('.tabs').addEventListener('keydown', e => {
+    const i = tabs.findIndex(t => t.dataset.tab === currentTab);
+    let j = null;
+    if (e.key === 'ArrowRight') j = (i + 1) % tabs.length;
+    else if (e.key === 'ArrowLeft') j = (i - 1 + tabs.length) % tabs.length;
+    else if (e.key === 'Home') j = 0;
+    else if (e.key === 'End') j = tabs.length - 1;
+    if (j !== null) { e.preventDefault(); setTab(tabs[j].dataset.tab, true); }
+  });
+
+  /* ---------- Redraw charts when their width changes ---------- */
+  const chartHosts = $$('.chart');
+  function redrawCharts() { chartHosts.forEach(h => { if (h._spec) renderChart(h, h._spec); }); }
+  if ('ResizeObserver' in window) {
+    const ro = new ResizeObserver(entries => {
+      for (const en of entries) {
+        const h = en.target, w = Math.floor(en.contentRect.width);
+        if (h._spec && w && w !== h._w) renderChart(h, h._spec);
+      }
+    });
+    chartHosts.forEach(h => ro.observe(h));
+  } else {
+    window.addEventListener('resize', redrawCharts);
+  }
+
+  /* ---------- Save and restore ---------- */
+  function persist() {
+    saveState({
+      tab: currentTab,
+      sip: { amount: sipAmount.value, rate: sipRate.value, years: sipYears.value, mode: sipMode(), lumps: lumps.map(l => ({ amount: l.amount, y: l.y, mo: l.mo })) },
+      emi: { amount: emiAmount.value, rate: emiRate.value, years: emiYears.value, start: $('#emiStart').value, group: emiGroup() }
+    });
+  }
+
+  $('#addLump').addEventListener('click', () => {
+    const N = sipYears.valid ? Math.max(1, Math.round(sipYears.value * 12)) : 120;
+    const m = Math.min(24, Math.floor(N / 2));
+    addLump({ amount: 100000, y: Math.floor(m / 12), mo: m % 12 }, true);
+    calcSip();
+  });
+  $$('input[name="sipMode"]').forEach(r => r.addEventListener('change', calcSip));
+  $$('input[name="emiGroup"]').forEach(r => r.addEventListener('change', calcEmi));
+  $('#emiStart').addEventListener('input', calcEmi);
+  $('#emiStart').addEventListener('change', calcEmi);
+
+  const saved = loadState() || {};
+  const S = saved.sip || {}, E = saved.emi || {};
+  sipAmount.set(isNum(S.amount) ? S.amount : 10000);
+  sipRate.set(isNum(S.rate) ? S.rate : 12);
+  sipYears.set(isNum(S.years) ? S.years : 10);
+  if (S.mode === 'cagr') $('#sipModeCagr').checked = true;
+  if (Array.isArray(S.lumps)) S.lumps.slice(0, MAX_LUMPS).forEach(l => { if (l && typeof l === 'object') addLump(l, false); });
+  emiAmount.set(isNum(E.amount) ? E.amount : 5000000);
+  emiRate.set(isNum(E.rate) ? E.rate : 8.5);
+  emiYears.set(isNum(E.years) ? E.years : 20);
+  const ns = nextMonth();
+  $('#emiStart').value = typeof E.start === 'string' && /^\d{4}-\d{2}$/.test(E.start) ? E.start : `${ns.y}-${String(ns.m + 1).padStart(2, '0')}`;
+  if (['loan', 'fy', 'cal'].includes(E.group)) $(`input[name="emiGroup"][value="${E.group}"]`).checked = true;
+  updateLumpUi();
+  calcSip();
+  calcEmi();
+  const hash = location.hash.replace('#', '');
+  setTab(hash === 'emi' || hash === 'sip' ? hash : saved.tab === 'emi' ? 'emi' : 'sip', false);
+})();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  }
+</script>
 </body>
 </html>
